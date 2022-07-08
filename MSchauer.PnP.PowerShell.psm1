@@ -94,6 +94,8 @@ function Add-PnPField.ms
     [string] $InternalName,
     [parameter(Mandatory=$true)]
     [string] $Type,
+    [parameter(Mandatory=$false)]
+    [string[]] $Choices,
     [Switch] $AddToDefaultView
   )
   $fld = $null;
@@ -115,10 +117,10 @@ function Add-PnPField.ms
 
     if ($fld.Title -ne $DisplayName){
       if ($List -eq ''){
-        Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;}
+        Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices
       }
       else {
-        Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;}
+        Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices
       }
     }
 
