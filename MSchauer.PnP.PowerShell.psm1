@@ -84,7 +84,7 @@ function New-PnPList.ms
   }
 }
 
-function Add-PnPField.ms
+function Add-PnPField.xx
  {
   param(
     [string] $List,
@@ -98,6 +98,8 @@ function Add-PnPField.ms
     [string[]] $Choices,
     [Switch] $AddToDefaultView
   )
+
+  Write-Host $Choices
   $fld = $null;
 
   if ($List -eq ''){
@@ -126,13 +128,13 @@ function Add-PnPField.ms
 
   } else {
     if ($List -eq ''){
-      Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type
+      Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
     }
     else {
       if ($AddToDefaultView){
-        Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView
+        Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView -Choices $Choices
       } else {
-        Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type
+        Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
       }
     }
 
@@ -140,6 +142,7 @@ function Add-PnPField.ms
   }
 
 }
+
 
 function Remove-PnPField.ms {
 	param(
