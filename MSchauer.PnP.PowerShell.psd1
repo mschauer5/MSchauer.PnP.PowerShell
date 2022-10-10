@@ -12,7 +12,7 @@
 RootModule = 'MSchauer.PnP.PowerShell.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.2'
+ModuleVersion = '1.0.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@ Description = 'PowerShell module that adds additional functionality to common Pn
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @("Get-PnPListItem.ms","Remove-PnPListItem.ms","Set-PnPListItem.ms","New-PnPList.ms","Add-PnPField.ms","Remove-PnPField.ms")
+FunctionsToExport = @("Get-MSchauer.PnP.PowerShell","Get-PnPListItem.ms","Remove-PnPListItem.ms","Set-PnPListItem.ms","New-PnPList.ms","Add-PnPField.ms","Remove-PnPField.ms")
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()

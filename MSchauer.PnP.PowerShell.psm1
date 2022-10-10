@@ -5,13 +5,17 @@ else {
   Install-Module -Name PnP.PowerShell -Force -Verbose -Scope CurrentUser
 }
 
+function Get-MSchauer.PnP.PowerShell {
+  (Get-Module -ListAvailable MSchauer.PnP.PowerShell).path
+}
+
 function Get-PnPListItem.ms {
 	param(
     [Parameter(Mandatory=$true,Position=0)]
 	  [string] $List,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$true,Position=1)]
 	  [string] $Field,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$true,Position=2)]
 	  $Value
 	)
 	$query = "<View><ViewFields><FieldRef Name='" + $field +"'/><FieldRef Name='ID'/></ViewFields><Query><Where><Eq><FieldRef Name='" + $field +"'/><Value Type='Text'>" + $value + "</Value></Eq></Where></Query></View>"
@@ -27,9 +31,9 @@ function Get-PnPListItem.ms {
     param(
       [Parameter(Mandatory=$true,Position=0)]
       [string] $List,
-      [Parameter(Mandatory=$true)]
+      [Parameter(Mandatory=$true,Position=1)]
       [string] $Searchfield,
-      [Parameter(Mandatory=$true)]
+      [Parameter(Mandatory=$true,Position=2)]
       $Value
     )
 
@@ -44,13 +48,13 @@ function Get-PnPListItem.ms {
   param(
     [Parameter(Mandatory=$true,Position=0)]
     [string] $List,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$true,Position=1)]
     [string] $Searchfield,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$true,Position=2)]
     $Values
   )
 
-  $id = Get-PnPListItem.ms $list $searchfield $values[$searchfield] $values
+  $id = Get-PnPListItem.ms $list $searchfield $values[$searchfield]
   if ($id -eq 0){
       Add-PnPListItem -List $list -Values $values
   } else {
@@ -84,7 +88,7 @@ function New-PnPList.ms
   }
 }
 
-function Add-PnPField.xx
+function Add-PnPField.ms
  {
   param(
     [string] $List,
@@ -96,10 +100,11 @@ function Add-PnPField.xx
     [string] $Type,
     [parameter(Mandatory=$false)]
     [string[]] $Choices,
+    [parameter(Mandatory=$false)]
+    [string] $Group,
     [Switch] $AddToDefaultView
   )
 
-  Write-Host $Choices
   $fld = $null;
 
   if ($List -eq ''){
@@ -119,7 +124,7 @@ function Add-PnPField.xx
 
     if ($fld.Title -ne $DisplayName){
       if ($List -eq ''){
-        Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices
+        Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices -Group $Group
       }
       else {
         Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices
@@ -164,3 +169,4 @@ Export-ModuleMember -Function Set-PnPListItem.ms
 Export-ModuleMember -Function New-PnPList.ms
 Export-ModuleMember -Function Add-PnPField.ms
 Export-ModuleMember -Function Remove-PnPField.ms
+Export-ModuleMember -Function Get-MSchauer.PnP.PowerShell
