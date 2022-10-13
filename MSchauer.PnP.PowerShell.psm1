@@ -124,26 +124,46 @@ function Add-PnPField.ms
 
     if ($fld.Title -ne $DisplayName){
       if ($List -eq ''){
-        Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices -Group $Group
+        if ($Type -eq 'Choice'){
+          Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices -Group $Group
+        }
+        else {
+          Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Group $Group
+        }
+
       }
       else {
+        if ($Type -eq 'Choice'){
         Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices
+        }
+        else {
+          Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;}
+        }
       }
     }
 
   } else {
     if ($List -eq ''){
+
       Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
     }
     else {
       if ($AddToDefaultView){
-        Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView -Choices $Choices
+        if ($Type -eq 'Choice'){
+          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView -Choices $Choices
+        } else {
+          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView
+        }
+
       } else {
-        Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
+        if ($Type -eq 'Choice'){
+          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
+        } else {
+          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type
+        }
+
       }
     }
-
-
   }
 
 }
