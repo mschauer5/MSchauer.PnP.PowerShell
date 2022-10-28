@@ -144,8 +144,11 @@ function Add-PnPField.ms
 
   } else {
     if ($List -eq ''){
-
-      Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
+      if ($Type -eq 'Choice'){
+        Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
+      } else {
+        Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type
+      }
     }
     else {
       if ($AddToDefaultView){
