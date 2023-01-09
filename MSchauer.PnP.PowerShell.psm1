@@ -56,9 +56,9 @@ function Get-PnPListItem.ms {
 
   $id = Get-PnPListItem.ms $list $searchfield $values[$searchfield]
   if ($id -eq 0){
-      Add-PnPListItem -List $list -Values $values
+    return  Add-PnPListItem -List $list -Values $values
   } else {
-      Set-PnPListItem -List $list -Identity $id -Values $values
+    return Set-PnPListItem -List $list -Identity $id -Values $values
   }
 }
 
@@ -186,10 +186,40 @@ function Remove-PnPField.ms {
 	}
 }
 
+function Copy-PnPList.ms{
+	param(
+    [Parameter(Mandatory=$true,Position=0)]
+	  [string] $SourceTitle,
+    [Parameter(Mandatory=$false,Position=1)]
+    [string] $SourceUrl,
+    [Parameter(Mandatory=$true,Position=2)]
+	  [string] $DestinationTitle,
+    [Parameter(Mandatory=$false,Position=3)]
+    [string] $DestinationUrl
+	)
+
+  if ($null -eq $DestinationUrl -or $DestinationUrl + '' -eq ''){
+   
+    $DestinationUrl = $SourceUrl
+  }
+
+  Connect-PnPOnline -Url $SourceUrl -Interactive
+  $sourceCtx = Get-PnPContext
+
+  Connect-PnPOnline -Url $DestinationUrl -Interactive
+  $destinationCtx = Get-PnPConnection
+
+  Set-PnPContext -Context $sourceCtx
+  Copy-PnPList -Identity $SourceTitle -Title $DestinationTitle -Connection $destinationCtx
+  
+}
+
 Export-ModuleMember -Function Get-PnPListItem.ms
 Export-ModuleMember -Function Remove-PnPListItem.ms
 Export-ModuleMember -Function Set-PnPListItem.ms
 Export-ModuleMember -Function New-PnPList.ms
 Export-ModuleMember -Function Add-PnPField.ms
 Export-ModuleMember -Function Remove-PnPField.ms
+Export-ModuleMember -Function Copy-PnPList.ms
 Export-ModuleMember -Function Get-MSchauer.PnP.PowerShell
+
