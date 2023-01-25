@@ -214,6 +214,37 @@ function Copy-PnPList.ms{
   
 }
 
+function Get-ListConfig{
+  param(
+    [Parameter(Mandatory=$true,Position=0)]
+	  [string] $Value
+	)
+  $val = $Value.Split("|");
+  return @{
+    list=$val[0];
+    url=$val[1];
+  }
+}
+
+function Connect-PnPOnline.ms{
+  param(
+    [Parameter(Mandatory=$true,Position=0)]
+	  [string] $Url
+	)
+
+  # Check if running in Azure
+  if ($ENV:FUNCTIONS_WORKER_RUNTIME_VERSION -eq "~7"){
+    Connect-PnPOnline -Url $Url -Interactive
+  } else {
+   Connect-PnPOnline -Url $Url -ManagedIdentity
+ }
+
+ $ctx = @{};
+ $ctx.PnPConnection = Get-PnPConnection;
+ $ctx.PnPContext = Get-PnPContext;
+ return $ctx;
+}
+
 Export-ModuleMember -Function Get-PnPListItem.ms
 Export-ModuleMember -Function Remove-PnPListItem.ms
 Export-ModuleMember -Function Set-PnPListItem.ms
@@ -222,4 +253,6 @@ Export-ModuleMember -Function Add-PnPField.ms
 Export-ModuleMember -Function Remove-PnPField.ms
 Export-ModuleMember -Function Copy-PnPList.ms
 Export-ModuleMember -Function Get-MSchauer.PnP.PowerShell
+Export-ModuleMember -Function Connect-PnPOnline.ms
+Export-ModuleMember -Function Get-ListConfig
 
