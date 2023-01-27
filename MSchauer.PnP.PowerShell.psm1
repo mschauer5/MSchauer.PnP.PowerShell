@@ -232,12 +232,13 @@ function Connect-PnPOnline.ms{
 	  [string] $Url
 	)
 
-  # Check if running in Azure
-  if ($ENV:FUNCTIONS_WORKER_RUNTIME_VERSION -eq "~7"){
+  if ($null -ne $ENV:ClientId -and $null -ne $ENV:TenantId -and $null -ne $ENV:CertificateThumbPrint){
+    Connect-PnPOnline -Url $Url -Tenant $ENV:TenantId -ClientId $ENV:ClientId -Thumbprint $ENV:CertificateThumbPrint
+  } elseif ($ENV:Interactive){
     Connect-PnPOnline -Url $Url -Interactive
   } else {
-   Connect-PnPOnline -Url $Url -ManagedIdentity
- }
+    Connect-PnPOnline -Url $Url -ManagedIdentity
+  }
 
  $ctx = @{};
  $ctx.PnPConnection = Get-PnPConnection;
