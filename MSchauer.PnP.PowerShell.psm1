@@ -226,11 +226,61 @@ function Get-ListConfig{
   }
 }
 
+function Get-LocalSettings {
+  param(
+    [Parameter(Mandatory=$false,Position=0)]
+	  [string] $Path
+	)
+  $config = $null; 
+
+  $localConfig = ".\local.settings.json"
+
+  if ($null -ne $Path){
+    $localConfig = "$($Path)$($localConfig)"
+  }
+
+  $configFileExist = Test-Path $localConfig
+  if ($true -eq $configFileExist)
+  {
+    $config  = Get-Content $localConfig | ConvertFrom-Json
+  }
+
+  return $config
+}
+
+function Set-LocalSettings {
+  [Parameter(Mandatory=$true,Position=0)]
+  [Object] $LocalSettings
+  if ($null -ne $LocalSettings)
+  {
+    if ($null -ne $LocalSettings.VALUES.TenantId){
+      $ENV:TenantId =$LocalSettings.VALUES.TenantId
+    }
+
+    if ($null -ne $LocalSettings.VALUES.ClientId){
+      $ENV:ClientId =$LocalSettings.VALUES.ClientId
+    }
+
+    if ($null -ne $LocalSettings.VALUES.CertificateThumbPrint){
+      $ENV:CertificateThumbPrint =$LocalSettings.VALUES.CertificateThumbPrint
+    }
+  }
+}
+
+
+
 function Connect-PnPOnline.ms{
   param(
     [Parameter(Mandatory=$true,Position=0)]
-	  [string] $Url
+	  [string] $Url,
+    [Parameter(Mandatory=$false,Position=1)]
+	  [Object] $LocalSettings
 	)
+
+  if ($null -ne $LocalSettings){
+    Set-LocalSettings $LocalSettings
+  }
+ 
 
   if ($null -ne $ENV:ClientId -and $null -ne $ENV:TenantId -and $null -ne $ENV:CertificateThumbPrint){
     Connect-PnPOnline -Url $Url -Tenant $ENV:TenantId -ClientId $ENV:ClientId -Thumbprint $ENV:CertificateThumbPrint
@@ -256,4 +306,6 @@ Export-ModuleMember -Function Copy-PnPList.ms
 Export-ModuleMember -Function Get-MSchauer.PnP.PowerShell
 Export-ModuleMember -Function Connect-PnPOnline.ms
 Export-ModuleMember -Function Get-ListConfig
+Export-ModuleMember -Function Set-LocalSettings
+Export-ModuleMember -Function Get-LocalSettings
 
