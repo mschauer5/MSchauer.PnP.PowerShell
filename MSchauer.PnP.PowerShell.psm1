@@ -106,7 +106,16 @@ function Add-PnPField.ms
   )
 
   $fld = $null;
+  $isDateOnly = $false;
 
+  $pnpField = $null;
+
+  if ($Type -eq 'DateOnly'){
+    $isDateOnly = $true;
+    $Type = 'DateTime'
+  }
+
+  # Get existing field
   if ($List -eq ''){
     $fld = Get-PnPField | Where-Object {$_.InternalName -eq $InternalName}
 
@@ -114,61 +123,86 @@ function Add-PnPField.ms
     $fld = Get-PnPField -List $List | Where-Object {$_.InternalName -eq $InternalName}
   }
 
+  # Field doesn't exist
   if ($null -ne $fld){
-
+    $pnpField =$fld;
     if ($fld.TypeAsString -ne $Type){
-      $message = $InternalName + ' already exist with a different field type!'
+      
+      $message = "$($InternalName) already exist with a different field type: $($fld.TypeAsString)!"
       Write-Error -Message $message
-      return;
+      return $pnpField;
     }
 
     if ($fld.Title -ne $DisplayName){
       if ($List -eq ''){
         if ($Type -eq 'Choice'){
-          Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices -Group $Group
+          $pnpField = Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices -Group $Group
         }
         else {
-          Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Group $Group
+          $pnpField = Set-PnPField -Identity $InternalName -Value @{'Title' = $DisplayName;} -Group $Group
         }
 
       }
       else {
         if ($Type -eq 'Choice'){
-        Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices
+          $pnpField =Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;} -Choices $Choices
         }
         else {
-          Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;}
+          $pnpField = Set-PnPField -List $List -Identity $InternalName -Value @{'Title' = $DisplayName;}
         }
       }
+    }
+
+    if ($true -eq $isDateOnly){
+      [XML]$SchemaXml = $pnpField.SchemaXml
+      $SchemaXml.Field.SetAttribute("Format","DateOnly")
+      Set-PnPField -List $List -Identity $PNPField.Id -Values @{SchemaXml =$SchemaXml.OuterXml}
     }
 
   } else {
     if ($List -eq ''){
       if ($Type -eq 'Choice'){
-        Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
+        $pnpField =Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
       } else {
-        Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type
+        $pnpField =Add-PnPField -DisplayName $DisplayName -InternalName $InternalName -Type $Type
+      }
+
+      if ($true -eq $isDateOnly){
+        [XML]$SchemaXml = $pnpField.SchemaXml
+        $SchemaXml.Field.SetAttribute("Format","DateOnly")
+        Set-PnPField -List $List -Identity $pnpField.Id -Values @{SchemaXml =$SchemaXml.OuterXml}
       }
     }
     else {
       if ($AddToDefaultView){
         if ($Type -eq 'Choice'){
-          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView -Choices $Choices
+          $pnpField =Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView -Choices $Choices
         } else {
-          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView
+          $pnpField = Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -AddToDefaultView
         }
 
       } else {
         if ($Type -eq 'Choice'){
-          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
+          $pnpField =Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type -Choices $Choices
         } else {
-          Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type
+          $pnpField = Add-PnPField -List $List -DisplayName $DisplayName -InternalName $InternalName -Type $Type
         }
 
       }
+
+      $pnpField | format-list
+
+      if ($true -eq $isDateOnly){
+        [XML]$SchemaXml = $pnpField.SchemaXml
+        $SchemaXml.Field.SetAttribute("Format","DateOnly")
+        Set-PnPField -List $List -Identity $pnpField.Id -Values @{SchemaXml =$SchemaXml.OuterXml} -UpdateExistingLists
+      }
     }
+
+
   }
 
+  return $pnpField;
 }
 
 
@@ -278,7 +312,7 @@ function Connect-PnPOnline.ms{
 	)
 
   if ($null -ne $LocalSettings){
-    Set-LocalSettings $LocalSettings
+    Set-LocalSettings $LocalSettings | Out-Null;
   }
  
 
@@ -290,9 +324,11 @@ function Connect-PnPOnline.ms{
     Connect-PnPOnline -Url $Url -ManagedIdentity
   }
 
- $ctx = @{};
- $ctx.PnPConnection = Get-PnPConnection;
- $ctx.PnPContext = Get-PnPContext;
+ $ctx = @{
+  PnPConnection = Get-PnPConnection;
+  PnPContext = Get-PnPContext;
+ };
+
  return $ctx;
 }
 
