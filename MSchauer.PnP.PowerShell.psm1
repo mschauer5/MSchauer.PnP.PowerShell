@@ -313,6 +313,16 @@ function Connect-PnPOnline.ms{
 
   if ($null -ne $LocalSettings){
     Set-LocalSettings $LocalSettings | Out-Null;
+  }else {
+    $workingDirectory = (Get-Item .).FullName;
+    $localsettingsFile = "$($workingDirectory)\local.settings.json"
+    $localsettingsFile
+    $localsettingsFile_exists = Test-Path -Path $localsettingsFile -PathType Leaf
+    if ($true -eq $localsettingsFile_exists){
+      $LocalSettings = Get-Content -Raw -Path  $localsettingsFile | ConvertFrom-Json;
+      Set-LocalSettings $LocalSettings | Out-Null;
+    }
+    
   }
  
 
